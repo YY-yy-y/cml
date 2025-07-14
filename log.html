@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра для моей любими ❤️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Используем кастомный шрифт для романтичного настроения */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F1F5F9; /* Более нейтральный фон */
+        }
+        .font-pacifico {
+            font-family: 'Pacifico', cursive;
+        }
+        /* Анимация появления */
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Анимация пульсации для сердечка */
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        /* Стили для карты */
+        #map {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 350px; /* Немного увеличим высоту для карты */
+            background-color: #E0F2FE; /* Голубой фон, как вода или небо */
+            background-image: url('https://www.transparenttextures.com/patterns/light-paper-fibers.png');
+            border: 2px solid #38BDF8;
+            border-radius: 1rem;
+            margin: 1rem auto;
+            overflow: hidden;
+        }
+        .location {
+            position: absolute;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .location:hover {
+            transform: scale(1.1);
+        }
+        .location-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #fca5a5;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            border: 3px solid white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .location-name {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #1E3A8A;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 99px;
+        }
+        #truck {
+            position: absolute;
+            z-index: 5;
+            font-size: 2.5rem;
+            transition: all 1.5s cubic-bezier(0.45, 0, 0.55, 1); /* Плавная анимация */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        #map-roads {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="game-container" class="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6 text-center">
+
+        <!-- Начальный экран -->
+        <div id="start-screen" class="fade-in">
+            <h1 class="font-pacifico text-4xl text-sky-500 mb-2">ПРАВИЛЬНАЯ ЛОГИСТИКА</h1>
+            <p class="text-lg mb-4">Специальные маршруты для любеме Камиллы!</p>
+            <div class="text-5xl mb-6 pulse">❤️</div>
+            <p class="mb-6">Готова любими?</p>
+            <button id="start-button" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform transform hover:scale-105">
+                Начать!
+            </button>
+        </div>
+
+        <!-- Игровой экран (изначально скрыт) -->
+        <div id="game-screen" class="hidden">
+            <h2 id="task-title" class="font-pacifico text-3xl text-sky-500 mb-2">Новый</h2>
+            <p id="task-description" class="mb-4 text-lg">Нужно забрать груз со "Склада Чувств"</p>
+
+            <div id="map">
+                <svg id="map-roads" preserveAspectRatio="none" viewBox="0 0 500 350">
+                    <!-- Дороги между точками -->
+                    <path d="M 75 175 C 150 50, 250 50, 250 70 S 300 250, 350 245 C 400 240, 400 175, 450 175" stroke="#a0aec0" stroke-width="6" fill="none" stroke-linecap="round"/>
+                    <path d="M 75 175 C 150 300, 250 300, 250 280 S 300 100, 350 105 C 400 110, 400 175, 450 175" stroke="#a0aec0" stroke-width="6" fill="none" stroke-linecap="round"/>
+                </svg>
+                <!-- Локации и грузовик будут добавлены через JS -->
+            </div>
+
+            <div id="message-box" class="mt-4 p-4 bg-sky-100 border border-sky-200 rounded-xl min-h-[100px] flex items-center justify-center">
+                <p id="message-text" class="text-sky-700 font-medium text-lg"></p>
+            </div>
+        </div>
+
+        <!-- Конечный экран (изначально скрыт) -->
+        <div id="end-screen" class="hidden fade-in">
+            <h1 class="font-pacifico text-4xl text-sky-500 mb-2">Маршрут завершен!</h1>
+            <div class="text-6xl my-6">🎉💖🎉</div>
+            <p class="text-xl mb-4">Ты идеально спланировала доставку!</p>
+            <p class="text-2xl font-bold text-sky-600 mb-6">Я тебя очень сильно люблю асалим!</p>
+            <button id="restart-button" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform transform hover:scale-105">
+                Спланировать еще раз
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Элементы DOM ---
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const map = document.getElementById('map');
+        const taskTitle = document.getElementById('task-title');
+        const taskDescription = document.getElementById('task-description');
+        const messageText = document.getElementById('message-text');
+        
+        // --- Глобальная переменная для грузовика ---
+        let truck = null;
+
+        // --- Игровые данные ---
+        const locations = {
+            start: { name: 'Склад чувств Юсуфбека', x: 10, y: 45, icon: '💖', el: null },
+            point1: { name: 'Душа Юсуфбека', x: 45, y: 15, icon: '✨', el: null },
+            point2: { name: 'Место для Любеме', x: 60, y: 75, icon: '🌸', el: null },
+            end: { name: 'Сердце Юсуфбека', x: 70, y: 45, icon: '💝', el: null }
+        };
+
+        const packages = [
+            { 
+                name: 'Любими', 
+                pickupMessage: 'Водитель позвонил тебе: Ты самый красивый человек во вселенной!',
+                deliveryMessage: 'Ты самый ценный для меня человек!'
+            },
+            { 
+                name: 'Любеме', 
+                pickupMessage: 'Я тебя обожаю всем своим сердцем',
+                deliveryMessage: 'Доставка моей любви прошла успешно!'
+            },
+            { 
+                name: 'Асалим', 
+                pickupMessage: 'Ты лучший человек с необычайной внешностью и высоким интеллектом.',
+                deliveryMessage: 'ЛЮБЛЮ ЦЕЛУЮЮЮЮ'
+            },
+            {
+                name: 'Камелла',
+                pickupMessage: 'Всегда работаю над собой с одной целью - сделать тебя счастливой',
+                deliveryMessage: 'Ты гений логистики!'
+            }
+        ];
+
+        // --- Состояние игры ---
+        let currentPackageIndex = 0;
+        let hasPackage = false;
+        let truckLocationKey = 'start';
+
+        // --- Функции ---
+
+        /**
+         * Отображает сообщение в специальном блоке
+         * @param {string} text - Текст сообщения
+         * @param {boolean} isAction - Это сообщение-действие или комплимент
+         */
+        function showMessage(text, isAction = false) {
+            const msgBox = messageText.parentElement;
+            msgBox.className = 'mt-4 p-4 rounded-xl min-h-[100px] flex items-center justify-center transition-all duration-300';
+            if (isAction) {
+                msgBox.classList.add('bg-sky-100', 'border', 'border-sky-200');
+                messageText.className = 'text-sky-700 font-medium text-lg';
+            } else {
+                msgBox.classList.add('bg-emerald-100', 'border', 'border-emerald-200');
+                messageText.className = 'text-emerald-700 font-medium text-lg';
+            }
+            messageText.textContent = text;
+            messageText.classList.remove('fade-in');
+            void messageText.offsetWidth; // Трюк для перезапуска анимации
+            messageText.classList.add('fade-in');
+        }
+
+        /**
+         * Перемещает грузовик в новую локацию
+         * @param {string} locationKey - Ключ локации из объекта locations
+         */
+        function moveTruck(locationKey) {
+            const targetLocation = locations[locationKey];
+            if (truck) {
+                truck.style.left = `calc(${targetLocation.x}% - 20px)`;
+                truck.style.top = `calc(${targetLocation.y}% - 25px)`;
+            }
+            truckLocationKey = locationKey;
+
+            // Делаем иконку активной локации ярче
+            Object.values(locations).forEach(loc => {
+                if (loc.el) {
+                    loc.el.querySelector('.location-icon').style.borderColor = 'white';
+                    loc.el.querySelector('.location-icon').style.backgroundColor = '#fca5a5';
+                }
+            });
+            if (targetLocation.el) {
+                 targetLocation.el.querySelector('.location-icon').style.borderColor = '#0284C7'; // Ярко-синий
+                 targetLocation.el.querySelector('.location-icon').style.backgroundColor = '#F87171';
+            }
+        }
+        
+        /**
+         * Обработчик клика по локации
+         * @param {string} clickedKey - Ключ кликнутой локации
+         */
+        function onLocationClick(clickedKey) {
+            moveTruck(clickedKey);
+            const pkg = packages[currentPackageIndex];
+
+            // Логика подбора груза
+            if (clickedKey === 'start' && !hasPackage) {
+                hasPackage = true;
+                taskTitle.textContent = 'Водитель в пути!';
+                taskDescription.textContent = `Направь его в "${locations.end.name}"`;
+                showMessage(pkg.pickupMessage);
+            } 
+            // Логика доставки груза
+            else if (clickedKey === 'end' && hasPackage) {
+                showMessage(pkg.deliveryMessage, false);
+                
+                currentPackageIndex++;
+                hasPackage = false;
+
+                // Проверяем, конец ли игры
+                if (currentPackageIndex >= packages.length) {
+                    setTimeout(endGame, 2500);
+                } else {
+                    const nextPkg = packages[currentPackageIndex];
+                    taskTitle.textContent = 'Новая задача!';
+                    taskDescription.textContent = `Отправь водителя за грузом "${nextPkg.name}"`;
+                }
+            }
+            // Клик по промежуточным точкам
+            else if (clickedKey !== 'start' && clickedKey !== 'end') {
+                 const compliments = [
+                    "Самая красивая",
+                    "Самая целеустремленная!",
+                    "Самая любимая.",
+                    "Я всегда с тобой, любими."
+                ];
+                showMessage(compliments[Math.floor(Math.random() * compliments.length)]);
+            }
+        }
+
+        /**
+         * Рисует карту с локациями
+         */
+        function drawMap() {
+            // Очищаем только локации, оставляя дороги и грузовик
+            map.querySelectorAll('.location').forEach(el => el.remove());
+
+            // Создаем грузовик, если его нет
+            if (!document.getElementById('truck')) {
+                const truckEl = document.createElement('div');
+                truckEl.id = 'truck';
+                truckEl.textContent = '🚚';
+                map.appendChild(truckEl);
+            }
+            // ВАЖНО: переназначаем глобальную переменную truck
+            truck = document.getElementById('truck');
+            
+            Object.keys(locations).forEach(key => {
+                const loc = locations[key];
+                const locationEl = document.createElement('div');
+                locationEl.className = 'location';
+                locationEl.style.left = `${loc.x}%`;
+                locationEl.style.top = `${loc.y}%`;
+                locationEl.innerHTML = `
+                    <div class="location-icon">${loc.icon}</div>
+                    <div class="location-name">${loc.name}</div>
+                `;
+                locationEl.addEventListener('click', () => onLocationClick(key));
+                map.appendChild(locationEl);
+                loc.el = locationEl; // Сохраняем ссылку на элемент
+            });
+        }
+
+        /**
+         * Начинает игру
+         */
+        function startGame() {
+            currentPackageIndex = 0;
+            hasPackage = false;
+            truckLocationKey = 'start';
+            
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('fade-in');
+
+            drawMap();
+            moveTruck('start');
+            
+            const firstPkg = packages[0];
+            taskTitle.textContent = 'Первая задача!';
+            taskDescription.textContent = `Отправь водителя за грузом "${firstPkg.name} на склад"`;
+            showMessage(`Нажми на "${locations.start.name}", чтобы отправить водителя!`, true);
+        }
+
+        /**
+         * Завершает игру
+         */
+        function endGame() {
+            gameScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+        }
+
+        // --- Навешиваем события ---
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+
+    </script>
+</body>
+</html>

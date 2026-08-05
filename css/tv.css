@@ -155,10 +155,15 @@ html, body {
   transition: opacity var(--dur-slow) var(--ease);
 }
 
-/* Canvas частиц поверх всего, не перехватывает клики */
+/* Canvas частиц поверх всего, не перехватывает клики.
+   ВАЖНО: canvas — replaced-элемент, и position:absolute + inset:0 его НЕ растягивает
+   (берётся интринсик 300×150). Поэтому задаём размеры явно, иначе частицы
+   рисуются только в углу 300×150. */
 #fx {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 5;
 }
@@ -191,17 +196,27 @@ html, body {
   font-size: clamp(40px, 9vmin, 150px);
   line-height: 1.02;
   letter-spacing: .01em;
-  /* Градиент по тексту: золото → тёплый белый → золото + шиммер */
-  background: linear-gradient(100deg,
-      var(--gold-deep) 0%, var(--gold) 25%, var(--gold-soft) 50%,
-      var(--gold) 75%, var(--gold-deep) 100%);
-  background-size: 220% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 .4vmin 2vmin rgba(243, 201, 107, .35));
-  animation: shimmer 6s linear infinite;
+  /* Базово — сплошное золото + тёмная тень для контраста над светлым фото.
+     Это ЗАПАСНОЙ вариант: он виден даже в старых браузерах Smart TV,
+     которые не умеют background-clip: text (иначе текст был бы прозрачным). */
+  color: var(--gold-soft);
+  filter:
+    drop-shadow(0 .3vmin .9vmin rgba(0, 0, 0, .65))
+    drop-shadow(0 .4vmin 2vmin rgba(243, 201, 107, .35));
+}
+/* Красивый градиент по буквам + шиммер — только там, где браузер это поддерживает. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero-title h1 {
+    background: linear-gradient(100deg,
+        var(--gold-deep) 0%, var(--gold) 25%, var(--gold-soft) 50%,
+        var(--gold) 75%, var(--gold-deep) 100%);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
 }
 @keyframes shimmer {
   from { background-position: 0% center; }

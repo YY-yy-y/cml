@@ -59,13 +59,33 @@ export class ParticleField {
   }
 
   _resize() {
+    const oldW = this.w, oldH = this.h;
     const r = this.canvas.getBoundingClientRect();
-    this.w = Math.max(1, r.width);
-    this.h = Math.max(1, r.height);
+    // Если по какой-то причине холст ещё без размеров (ранняя инициализация,
+    // особенности браузера ТВ) — берём размер окна, чтобы не остаться 300×150.
+    this.w = Math.max(1, r.width || this.canvas.clientWidth || window.innerWidth || 1);
+    this.h = Math.max(1, r.height || this.canvas.clientHeight || window.innerHeight || 1);
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.canvas.width = Math.round(this.w * this.dpr);
     this.canvas.height = Math.round(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+
+    // Пропорционально переносим уже существующие частицы. Иначе, если размер
+    // холста изменился ПОСЛЕ инициализации (частый случай на ТВ — сначала
+    // маленький кадр, потом полноэкранный), частицы остаются сбитыми в угол.
+    if (oldW && oldH && (oldW !== this.w || oldH !== this.h)) {
+      const sx = this.w / oldW, sy = this.h / oldH;
+      const scale = (arr) => { if (arr) for (const p of arr) { p.x *= sx; p.y *= sy; } };
+      scale(this.fireflies); scale(this.bokeh); scale(this.petals);
+    }
+  }
+
+  // Заново равномерно раскидать все частицы по холсту.
+  // Вызываем, когда сцена уже точно видна и размеры финальные.
+  rescatter() {
+    if (this.fireflies) for (const p of this.fireflies) { p.x = rand(0, this.w); p.y = rand(0, this.h); }
+    if (this.bokeh) for (const p of this.bokeh) { p.x = rand(0, this.w); p.y = rand(0, this.h); }
+    if (this.petals) for (const p of this.petals) { p.x = rand(0, this.w); p.y = rand(-this.h, this.h); }
   }
 
   _initParticles() {
@@ -246,7 +266,7 @@ export class ParticleField {
     // Периодические вспышки-блики у случайных светлячков.
     this.sparkTimer -= dt;
     if (this.sparkTimer <= 0 && !this.reduced) {
-      this.sparkTimer = rand(2, 4);
+      this.sparkTimer = rand(3, 6);
       const p = this.fireflies[(Math.random() * this.fireflies.length) | 0];
       if (p) { p._flash = 0.001; p._flashDur = rand(0.5, 0.9); }
     }

@@ -83,6 +83,12 @@ async function init() {
   preloader.classList.add('is-hidden');
   revealCollage(collageEl);
   state.particles.start();
+  // Сцена теперь точно видна и размеры финальные — пересчитываем холст
+  // и равномерно раскидываем частицы, чтобы они не сбивались в угол.
+  requestAnimationFrame(() => {
+    state.particles._resize();
+    state.particles.rescatter();
+  });
 
   // Связь (хост)
   setupConnection();

@@ -52,6 +52,9 @@ export function buildCollage(container) {
     img.className = 'tile__img ' + KEN_VARIANTS[i % KEN_VARIANTS.length];
     img.style.setProperty('--kb-delay', `${(i * 1.7) % 12}s`);
     img.style.setProperty('--kb-dur', `${20 + (i % 4) * 4}s`);
+    // Смещение кадрирования, чтобы не резать лица на широких плитках.
+    const op = CONFIG.collage.objectPosition && CONFIG.collage.objectPosition[i];
+    img.style.objectPosition = op || 'center';
     img.decoding = 'async';
     img.loading = 'eager';
     img.alt = '';

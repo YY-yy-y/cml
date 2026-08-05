@@ -108,20 +108,29 @@ async function onStart() {
   showScreen('ar-screen');
   requestWakeLock();
 
+  // В режиме отладки всегда показываем кнопки-заглушки как аварийный ввод...
   if (DEBUG) {
-    // Режим отладки: без камеры, только кнопки-заглушки.
     debugControls.classList.add('show');
     initArParticles();
     updateBottom();
-    return;
   }
 
+  // ...но камеру пытаемся запустить в любом случае, включая debug —
+  // так на самом телефоне можно проверить РЕАЛЬНЫЙ трекинг и видеть статус.
   try {
     await startAR();
   } catch (e) {
     console.warn('AR/camera error:', e);
-    showScreen('camera-error');
+    setArStatus('Камера недоступна' + (e && e.message ? ': ' + e.message : ''));
+    // В debug остаёмся на экране с кнопками-заглушками; в обычном режиме — экран ошибки.
+    if (!DEBUG) showScreen('camera-error');
   }
+}
+
+// Небольшой статус трекинга поверх камеры — чтобы видеть, что происходит.
+function setArStatus(text) {
+  const el = document.getElementById('ar-status');
+  if (el) el.textContent = text;
 }
 
 // Wake Lock — не даём экрану гаснуть. Оборачиваем в try/catch.
@@ -178,21 +187,30 @@ async function startAR() {
     anchor.onTargetLost = () => onTargetHidden(i);
   }
 
+  setArStatus('Запуск камеры…');
   await S.mindar.start();
   renderer.setAnimationLoop(() => renderer.render(scene, camera));
 
   S.arActive = true;
+  S.foundEvents = 0;
   initArParticles();
   updateBottom();
   startHoldLoop();
+  setArStatus('Ищу фото… наведите ровно');
+  console.log('[AR] MindAR запущен, камера работает, целей в файле: ' + TOTAL);
 }
 
 function onTargetVisible(i) {
+  S.foundEvents = (S.foundEvents || 0) + 1;
+  console.log('[AR] вижу цель #' + i);
   if (S.paused) return;
   S.visibleTarget = i;
+  setArStatus('Вижу фото ' + (i + 1) + ' — держите ровно');
 }
 function onTargetHidden(i) {
+  console.log('[AR] потеряна цель #' + i);
   if (S.visibleTarget === i) S.visibleTarget = null;
+  if (!S.paused) setArStatus('Ищу фото… наведите ровно');
 }
 
 // ============================================================================

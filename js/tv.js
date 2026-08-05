@@ -423,20 +423,11 @@ function renderQR() {
 //  Ввод: скрытые триггеры QR, аварийные клавиши, отладка
 // ============================================================================
 function setupInput() {
-  // 1) Невидимая угловая зона — переключает QR
-  cornerTrigger.addEventListener('click', () => toggleQR());
+  // Одиночный тап/клик по экрану заставки показывает QR (повторный — скрывает).
+  // toggleQR сам игнорирует режимы охоты/финала, чтобы не сбить праздник.
+  document.addEventListener('click', () => toggleQR());
 
-  // 3) Тройной клик/тап где угодно за 1.5 с
-  let clicks = [];
-  document.addEventListener('click', (e) => {
-    if (e.target === cornerTrigger) return;
-    const now = Date.now();
-    clicks = clicks.filter((t) => now - t < 1500);
-    clicks.push(now);
-    if (clicks.length >= 3) { clicks = []; toggleQR(); }
-  });
-
-  // 2) Клавиши пульта + аварийный ручной ввод + отладка
+  // Клавиши пульта + аварийный ручной ввод + отладка
   document.addEventListener('keydown', (e) => {
     const k = e.key;
 

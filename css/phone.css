@@ -195,6 +195,24 @@ html, body {
   transform: scale(1.1);
 }
 
+/* Живой статус трекинга (видно, ловит ли камера фото) */
+.ar-status {
+  position: absolute;
+  top: calc(var(--safe-t) + 7vh);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 86vw;
+  text-align: center;
+  padding: 1vh 4vw;
+  border-radius: 999px;
+  background: rgba(20, 12, 12, .5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(243, 201, 107, .25);
+  font-size: clamp(13px, 3.6vw, 16px);
+  color: var(--champagne);
+}
+
 /* Нижняя подсказка «Осталось найти: N» */
 .ar-bottom {
   position: absolute;

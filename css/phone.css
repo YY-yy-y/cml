@@ -1,0 +1,390 @@
+/* ==========================================================================
+   phone.css — экран телефона (вертикальная ориентация). iOS Safari + Android.
+   Учитываем safe-area insets.
+   ========================================================================== */
+
+:root {
+  --bg-0: #120a0e;
+  --bg-1: #1c1013;
+  --gold: #f3c96b;
+  --gold-soft: #ffe6b0;
+  --gold-deep: #c99a45;
+  --champagne: #ffe9c7;
+  --text: #fff6ea;
+
+  --dur-fast: 240ms;
+  --dur: 500ms;
+  --dur-slow: 800ms;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --overshoot: cubic-bezier(.2, 1.25, .3, 1);
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, var(--bg-1), var(--bg-0) 75%);
+  color: var(--text);
+  font-family: 'Golos Text', 'Manrope', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+.screen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: calc(var(--safe-t) + 6vh) 7vw calc(var(--safe-b) + 5vh);
+}
+.screen.active { display: flex; }
+
+/* Частицы на приветственном экране */
+#fx {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* --- Экран приветствия --- */
+#welcome { z-index: 2; }
+#welcome .content { position: relative; z-index: 2; max-width: 92vw; }
+.hi {
+  font-family: 'Cormorant', serif;
+  font-weight: 700;
+  font-size: clamp(34px, 12vw, 64px);
+  color: var(--gold-soft);
+  line-height: 1.05;
+  filter: drop-shadow(0 2px 16px rgba(243, 201, 107, .3));
+  opacity: 0;
+  animation: rise var(--dur-slow) var(--ease) .1s forwards;
+}
+.lead {
+  margin-top: 3vh;
+  font-size: clamp(16px, 4.6vw, 22px);
+  line-height: 1.5;
+  color: var(--champagne);
+  opacity: 0;
+  animation: rise var(--dur-slow) var(--ease) .35s forwards;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); filter: blur(8px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+.btn {
+  margin-top: 5vh;
+  border: none;
+  border-radius: 999px;
+  padding: 3.4vh 9vw;
+  font-family: 'Golos Text', sans-serif;
+  font-weight: 600;
+  font-size: clamp(18px, 5vw, 24px);
+  color: #2a1a10;
+  background: linear-gradient(120deg, var(--gold-deep), var(--gold), var(--gold-soft));
+  box-shadow: 0 10px 30px rgba(243, 201, 107, .35), 0 0 0 1px rgba(255, 240, 210, .3) inset;
+  cursor: pointer;
+  opacity: 0;
+  animation: rise var(--dur-slow) var(--ease) .6s forwards;
+  transition: transform var(--dur-fast) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(.96); }
+.btn.secondary {
+  color: var(--gold-soft);
+  background: rgba(255, 235, 200, .1);
+  border: 1px solid rgba(243, 201, 107, .4);
+  box-shadow: none;
+}
+
+.hint-small {
+  margin-top: 3vh;
+  font-size: clamp(12px, 3.4vw, 15px);
+  color: rgba(255, 240, 220, .55);
+  opacity: 0;
+  animation: rise var(--dur-slow) var(--ease) .8s forwards;
+}
+
+/* --- Экран ошибки камеры --- */
+#camera-error .content { max-width: 90vw; }
+.err-title {
+  font-family: 'Cormorant', serif;
+  font-size: clamp(26px, 8vw, 40px);
+  color: var(--gold-soft);
+  margin-bottom: 2vh;
+}
+.err-text {
+  font-size: clamp(15px, 4.2vw, 19px);
+  line-height: 1.55;
+  color: var(--champagne);
+}
+.err-text b { color: var(--gold); }
+
+/* ==========================================================================
+   Экран AR
+   ========================================================================== */
+#ar-screen {
+  display: none;
+  padding: 0;
+}
+#ar-screen.active { display: block; }
+
+/* Контейнер MindAR (видео + canvas three.js) */
+#ar-container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+#ar-container video,
+#ar-container canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* Слой HTML-интерфейса поверх камеры */
+.ar-ui {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Верхний мини-прогресс: 5 точек */
+.ar-top {
+  position: absolute;
+  top: calc(var(--safe-t) + 2vh);
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 3vw;
+}
+.dot {
+  width: 3.4vh;
+  height: 3.4vh;
+  max-width: 26px; max-height: 26px;
+  border-radius: 50%;
+  background: rgba(20, 12, 12, .5);
+  border: 2px solid rgba(243, 201, 107, .5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--overshoot);
+}
+.dot.filled {
+  background: linear-gradient(120deg, var(--gold-deep), var(--gold-soft));
+  border-color: var(--gold-soft);
+  box-shadow: 0 0 12px rgba(243, 201, 107, .7);
+  transform: scale(1.1);
+}
+
+/* Нижняя подсказка «Осталось найти: N» */
+.ar-bottom {
+  position: absolute;
+  bottom: calc(var(--safe-b) + 3vh);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1.4vh 5vw;
+  border-radius: 999px;
+  background: rgba(20, 12, 12, .5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(243, 201, 107, .3);
+  font-size: clamp(14px, 4vw, 18px);
+  color: var(--gold-soft);
+}
+
+/* Круговой индикатор удержания */
+.hold-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(.94);
+  width: 62vw;
+  height: 62vw;
+  max-width: 360px; max-height: 360px;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.hold-ring.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.hold-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.hold-ring__track { fill: none; stroke: rgba(255, 235, 200, .18); stroke-width: 3; }
+.hold-ring__fill {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 80ms linear, stroke 200ms linear;
+  filter: drop-shadow(0 0 6px rgba(243, 201, 107, .6));
+}
+.hold-ring__label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: 'Cormorant', serif;
+  font-size: clamp(18px, 6vw, 30px);
+  color: var(--gold-soft);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .6);
+}
+/* Галочка после 100% */
+.hold-ring.done .hold-ring__label { font-size: clamp(30px, 12vw, 60px); }
+
+/* Мягкая подсказка «эту уже нашла» */
+.soft-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--safe-b) + 12vh);
+  transform: translateX(-50%);
+  padding: 1.4vh 5vw;
+  border-radius: 999px;
+  background: rgba(20, 12, 12, .6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--champagne);
+  font-size: clamp(14px, 4vw, 18px);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+  pointer-events: none;
+  text-align: center;
+  max-width: 84vw;
+}
+.soft-hint.show { opacity: 1; }
+
+/* Экран находки (поверх AR) */
+.found-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8vh 8vw;
+  background: radial-gradient(circle at 50% 45%, rgba(30, 18, 20, .82), rgba(15, 8, 10, .92));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease);
+}
+.found-flash.show { opacity: 1; pointer-events: auto; }
+.found-flash .big {
+  font-family: 'Cormorant', serif;
+  font-weight: 700;
+  font-size: clamp(40px, 14vw, 76px);
+  color: var(--gold-soft);
+  filter: drop-shadow(0 4px 20px rgba(243, 201, 107, .5));
+  transform: scale(.8);
+  transition: transform var(--dur) var(--overshoot);
+}
+.found-flash.show .big { transform: scale(1); }
+.found-flash .sub {
+  margin-top: 3vh;
+  font-size: clamp(18px, 5vw, 26px);
+  color: var(--champagne);
+}
+/* Автономный текст поздравления (если нет связи с ТВ) */
+.found-flash .congrat {
+  margin-top: 4vh;
+  font-family: 'Cormorant', serif;
+  font-size: clamp(18px, 5.4vw, 28px);
+  line-height: 1.45;
+  color: var(--text);
+  max-width: 88vw;
+  white-space: pre-line;
+}
+
+/* Золотая вспышка на весь экран */
+.gold-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 230, 170, .9), rgba(255, 210, 140, 0) 60%);
+  opacity: 0;
+  pointer-events: none;
+}
+.gold-flash.fire { animation: goldFlash 700ms var(--ease); }
+@keyframes goldFlash {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Canvas для салюта частиц поверх AR */
+#ar-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* --- Финальный экран телефона --- */
+#phone-final { z-index: 6; }
+#phone-final .content { max-width: 90vw; position: relative; z-index: 2; }
+.final-big {
+  font-family: 'Cormorant', serif;
+  font-weight: 700;
+  font-size: clamp(34px, 11vw, 58px);
+  color: var(--gold-soft);
+  filter: drop-shadow(0 4px 20px rgba(243, 201, 107, .5));
+}
+.final-line {
+  margin-top: 4vh;
+  font-size: clamp(17px, 4.8vw, 22px);
+  line-height: 1.5;
+  color: var(--champagne);
+  white-space: pre-line;
+}
+
+/* Статус связи (мелко сверху) */
+.conn-badge {
+  position: fixed;
+  top: calc(var(--safe-t) + 1vh);
+  right: calc(var(--safe-r) + 3vw);
+  z-index: 8;
+  font-size: 11px;
+  color: rgba(255, 240, 220, .5);
+  pointer-events: none;
+}
+
+/* Отладочная панель телефона */
+#debug-controls {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-b) + 10vh);
+  transform: translateX(-50%);
+  z-index: 20;
+  display: none;
+  flex-wrap: wrap;
+  gap: 2vw;
+  justify-content: center;
+  width: 90vw;
+}
+#debug-controls.show { display: flex; }
+#debug-controls button {
+  border: 1px solid rgba(243, 201, 107, .5);
+  background: rgba(20, 12, 12, .7);
+  color: var(--gold-soft);
+  border-radius: 10px;
+  padding: 1.2vh 3vw;
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hi, .lead, .btn, .hint-small { animation-duration: 1ms; }
+}

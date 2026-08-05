@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>С днём рождения, мамочка</title>
+
+  <!-- Шрифты с поддержкой кириллицы -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;0,700;1,500&family=Golos+Text:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/tv.css" />
+
+  <!-- Библиотеки с CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+  <!-- Прелоадер: ждём загрузки всех фото коллажа -->
+  <div id="preloader">
+    <div class="preloader__inner">
+      <div class="preloader__mark">С днём рождения…</div>
+      <div class="preloader__bar"><div class="preloader__fill" id="preloader-fill"></div></div>
+    </div>
+  </div>
+
+  <main class="stage" id="stage" data-mode="idle">
+    <!-- Коллаж -->
+    <div class="collage" id="collage"></div>
+
+    <!-- Тёплый оверлей + виньетка -->
+    <div class="overlay"></div>
+
+    <!-- Частицы -->
+    <canvas id="fx"></canvas>
+
+    <!-- Заголовок заставки -->
+    <div class="hero-title" id="hero">
+      <h1 id="hero-h1"></h1>
+      <div class="divider">
+        <span class="divider__line"></span>
+        <span class="divider__gem">✦</span>
+        <span class="divider__line"></span>
+      </div>
+      <div class="subtitle" id="hero-sub"></div>
+    </div>
+
+    <!-- Карточка QR -->
+    <div class="qr-card" id="qr-card">
+      <h2>Наведите камеру телефона</h2>
+      <div class="qr-card__code" id="qr-code"></div>
+      <div class="qr-card__note">и начнётся кое-что интересное</div>
+    </div>
+    <div class="link-status" id="link-status">ожидание…</div>
+
+    <!-- Слой охоты -->
+    <div class="hunt" id="hunt">
+      <div class="hunt__instruction" id="instruction">
+        <div class="line1" id="instr-1"></div>
+        <div class="line2" id="instr-2"></div>
+      </div>
+
+      <div class="aim-ring" id="aim-ring">
+        <svg viewBox="0 0 100 100">
+          <circle class="aim-ring__track" cx="50" cy="50" r="46" />
+          <circle class="aim-ring__fill" id="aim-fill" cx="50" cy="50" r="46"
+                  stroke-dasharray="289" stroke-dashoffset="289" />
+        </svg>
+        <div class="aim-ring__label">держите…</div>
+      </div>
+
+      <div class="hunt__message" id="hunt-message"></div>
+    </div>
+
+    <!-- Прогресс-бар -->
+    <div class="progress" id="progress">
+      <div class="progress__cells" id="cells"></div>
+      <div class="progress__bar"><div class="progress__fill" id="progress-fill"></div></div>
+      <div class="progress__count" id="progress-count"><span class="num">0</span> из 5</div>
+    </div>
+
+    <!-- Финал -->
+    <div class="final" id="final">
+      <div class="final__text" id="final-text"></div>
+    </div>
+
+    <!-- Лента найденных фото (после возврата на заставку) -->
+    <div class="found-ribbon" id="found-ribbon"></div>
+
+    <!-- Скрытая зона-триггер QR (правый нижний угол) -->
+    <div id="corner-trigger"></div>
+
+    <!-- Индикатор офлайн-режима -->
+    <div id="offline-note">офлайн-режим</div>
+
+    <!-- Отладочная панель -->
+    <div id="debug-panel"></div>
+  </main>
+
+  <script type="module" src="js/tv.js"></script>
+</body>
+</html>

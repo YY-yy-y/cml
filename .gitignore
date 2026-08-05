@@ -1,0 +1,7 @@
+# Спецификация задачи — не часть сайта
+prompt-for-claude-code.md
+
+# Системный мусор
+.DS_Store
+Thumbs.db
+desktop.ini

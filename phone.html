@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Поиск фотографий 💛</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;0,700;1,500&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/phone.css" />
+
+  <!-- PeerJS для связи с ТВ -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+  <!-- three.js + MindAR как ES-модули по importmap (как в примерах MindAR).
+       MindAR — это ES-модуль (import ... from "three"), поэтому подключается
+       ТОЛЬКО через importmap и динамический import в phone.js, а не <script src>. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/",
+      "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Частицы (общий фон приветствия/финала) -->
+  <canvas id="fx"></canvas>
+
+  <div class="conn-badge" id="conn-badge"></div>
+
+  <!-- Экран 1: приветствие -->
+  <section class="screen active" id="welcome">
+    <div class="content">
+      <div class="hi">Ассалому алейкум,<br />мамочка!</div>
+      <div class="lead">
+        Наведите камеру на фотографии, приклеенные к шарику,
+        и подержите пару секунд — увидите, что будет 💛
+      </div>
+      <button class="btn" id="start-btn">Начать поиск</button>
+      <div class="hint-small">Разрешите доступ к камере, когда телефон попросит.</div>
+    </div>
+  </section>
+
+  <!-- Экран ошибки камеры -->
+  <section class="screen" id="camera-error">
+    <div class="content">
+      <div class="err-title">Нужен доступ к камере</div>
+      <div class="err-text">
+        Чтобы искать фотографии, разрешите приложению камеру.<br /><br />
+        Обычно нужно нажать на значок <b>«Аа»</b> или <b>замочек</b> в адресной строке,
+        выбрать <b>«Настройки сайта»</b> → <b>Камера</b> → <b>Разрешить</b>,
+        затем нажать кнопку ниже.
+      </div>
+      <button class="btn" id="retry-btn">Попробовать снова</button>
+    </div>
+  </section>
+
+  <!-- Экран AR -->
+  <section class="screen" id="ar-screen">
+    <div id="ar-container"></div>
+    <canvas id="ar-fx"></canvas>
+    <div class="gold-flash" id="gold-flash"></div>
+
+    <div class="ar-ui">
+      <!-- Верх: 5 точек -->
+      <div class="ar-top" id="ar-dots"></div>
+
+      <!-- Круговой индикатор удержания -->
+      <div class="hold-ring" id="hold-ring">
+        <svg viewBox="0 0 100 100">
+          <circle class="hold-ring__track" cx="50" cy="50" r="46" />
+          <circle class="hold-ring__fill" id="hold-fill" cx="50" cy="50" r="46"
+                  stroke-dasharray="289" stroke-dashoffset="289" stroke="#ffffff" />
+        </svg>
+        <div class="hold-ring__label" id="hold-label">Держите ровно…</div>
+      </div>
+
+      <!-- Мягкая подсказка -->
+      <div class="soft-hint" id="soft-hint">Эту уже нашли, ищите другую 💛</div>
+
+      <!-- Низ: осталось найти -->
+      <div class="ar-bottom" id="ar-bottom">Осталось найти: 5</div>
+    </div>
+
+    <!-- Экран находки -->
+    <div class="found-flash" id="found-flash">
+      <div class="big">Нашли! 💛</div>
+      <div class="sub">Посмотрите на телевизор →</div>
+      <div class="congrat" id="found-congrat"></div>
+    </div>
+
+    <!-- Отладочные кнопки (только при ?debug=1) -->
+    <div id="debug-controls">
+      <button data-t="0">Цель 1</button>
+      <button data-t="1">Цель 2</button>
+      <button data-t="2">Цель 3</button>
+      <button data-t="3">Цель 4</button>
+      <button data-t="4">Цель 5</button>
+    </div>
+  </section>
+
+  <!-- Финальный экран телефона -->
+  <section class="screen" id="phone-final">
+    <div class="content">
+      <div class="final-big">Вы нашли всё 💛</div>
+      <div class="final-line" id="phone-final-line"></div>
+    </div>
+  </section>
+
+  <script type="module" src="js/phone.js"></script>
+</body>
+</html>

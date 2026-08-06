@@ -453,9 +453,21 @@ html, body {
   left: 50%;
   top: 46%;
   transform: translate(-50%, -50%);
-  width: min(84vw, 150vmin);
+  width: fit-content;
+  max-width: min(84vw, 150vmin);
   text-align: center;
   pointer-events: none;
+  padding: 3.6vmin 5.5vmin;
+  border-radius: 3vmin;
+}
+/* Полупрозрачная «стеклянная» подложка — только когда есть текст,
+   чтобы поздравление читалось поверх любых фотографий коллажа. */
+.hunt__message:not(:empty) {
+  background: rgba(18, 10, 12, .52);
+  backdrop-filter: blur(16px) saturate(1.05);
+  -webkit-backdrop-filter: blur(16px) saturate(1.05);
+  border: .2vmin solid rgba(243, 201, 107, .28);
+  box-shadow: 0 2.4vmin 6vmin rgba(0, 0, 0, .5);
 }
 .hunt__message .msg-line {
   display: block;
